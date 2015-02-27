@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include "bstree.h"
 
 bstree* init_bstree()
@@ -9,15 +8,28 @@ bstree* init_bstree()
   tree->count = 0;
   return tree;
 }
+static void destory_bstree_node(bstree_node *node)
+{
+  if (node == NULL) return;
+  destory_bstree_node(node->left);
+  destory_bstree_node(node->right);
+  free(node);
+}
+void destory_bstree(bstree *tree)
+{
+  destory_bstree_node(tree->root);
+  free(tree);
+}
 /*
  * 中序遍历
  */
-void inorder(bstree_node *node)
+void inorder(bstree_node *node, void (*action_func)(bstree_node *))
 {
   if (node == NULL) return;
-  inorder(node->left);
-  printf("%d\n", node->key);
-  inorder(node->right);
+  inorder(node->left, action_func);
+  action_func(node);
+  //printf("%d\n", node->key);
+  inorder(node->right, action_func);
 }
 
 void insert_node(bstree *tree, int key)
@@ -104,4 +116,26 @@ bstree_node* search_predecessor(bstree_node *node)
 
 void delete_node(bstree *tree, int key)
 {
+  bstree_node *node = search(tree, key);
+  if (node == NULL) return;
+  // find the node to del
+  bstree_node *node_to_del = (node->left == NULL || node->right == NULL)
+    ? node
+    : search_succssor(node);
+  // find a child node for fix relationship
+  bstree_node *child = node_to_del->left == NULL
+    ? node_to_del->right : node_to_del->left;
+  // finx child to new parent relationship
+  if (child != NULL)
+    child->parent = node_to_del->parent;
+  if (node_to_del->parent == NULL) // empty tree after del
+    tree->root = NULL;
+  else if (node_to_del->parent->left == node_to_del) // del node is left child
+    node_to_del->parent->left = child;
+  else // del node is right child
+    node_to_del->parent->right = child;
+  // keep the key by node
+  if (node != node_to_del)
+    node->key = node_to_del->key;
+  free(node_to_del);
 }
