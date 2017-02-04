@@ -1,6 +1,7 @@
 require 'set'
+require File.dirname(__FILE__) + '/dfa.rb'
 
-class FARule < Struct.new(:state, :character, :next_state)
+class FARule
   def applies_to?(state, character)
     self.state == state && self.character == character
   end
@@ -65,5 +66,5 @@ class NFADesign < Struct.new(:start_state, :accept_states, :rulebook)
   end
   def to_nfa
     NFA.new(Set[start_state], accept_states, rulebook)
-  end 
+  end
 end
