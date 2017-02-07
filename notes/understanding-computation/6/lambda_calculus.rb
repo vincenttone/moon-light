@@ -105,3 +105,6 @@ class LCCall
     end
   end
 end
+
+require 'treetop'
+Treetop.load('lambda_calculus')
