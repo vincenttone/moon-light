@@ -107,4 +107,4 @@ class LCCall
 end
 
 require 'treetop'
-Treetop.load('lambda_calculus')
+Treetop.load(File.dirname(__FILE__) + '/lambda_calculus')
