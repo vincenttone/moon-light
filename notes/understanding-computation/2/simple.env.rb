@@ -172,11 +172,13 @@ class Assign < Struct.new(:name, :expression)
   end
 end
 
+=begin
 #  (1 * 2) + (3 * 4)
 Machine.new(
             Add.new(Variable.new(:x), Variable.new(:y)),
             {x: Number.new(3), y: Number.new(4)}
 ).run
+=end
 
 Object.send(:remove_const, :Machine)
 
