@@ -1,0 +1,54 @@
+#!/usr/bin/env php
+<?php
+$a = getopt('1:2:s');
+if (!isset($a['1']) || !isset($a[2])) {
+    echo 'No json to diff'.PHP_EOL;
+    echo 'USEAGE: '.__FILE__.' -1{JSON} -2{JSON} [-s]'.PHP_EOL;
+    echo "\t-1 json to diff".PHP_EOL;
+    echo "\t-2 another json to diff".PHP_EOL;
+    echo "\t-s strict checking".PHP_EOL;
+    exit;
+}
+$j1 = json_decode($a[1], true);
+$j2 = json_decode($a[2], true);
+$s = isset($a['s']) ? true : false;
+
+if (is_array($j1) && is_array($j2)) {
+    diff($j1, $j2, '', $s);
+} else {
+    echo 'not json format'.PHP_EOL;
+}
+
+function equal($s1, $s2, $s = false)
+{
+    if ($s) {
+        return $s1 === $s2;
+    }
+    return $s1 == $s2;
+}
+
+function diff($a1, $a2, $p, $s)
+{
+    foreach ($a1 as $_k => $_v) {
+        $prekey = $p . "\t" .$_k;
+        if (isset($a2[$_k])) {
+            if(is_array($_v)) {
+                diff($_v, $a2[$_k], $prekey, $s);
+            } else {
+                if (equal($a2[$_k], $_v, $s)) {
+                    echo "[SAME]\t" . $prekey . '' . PHP_EOL;
+                } else {
+                    echo "[DIFF]\t" .$prekey . '' . PHP_EOL;
+                }
+            }
+            unset($a2[$_k]);
+        } else {
+            echo "[NOT EXIST]\t" . $prekey . '' . PHP_EOL;
+        }
+    }
+    if (!empty($a2)) {
+        foreach ($a2 as $_k => $_v) {
+            echo "[SURPLUS]\t" . $p . "\t" . $_k. PHP_EOL;
+        }
+    }
+}
