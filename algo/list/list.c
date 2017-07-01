@@ -27,8 +27,8 @@ void vListRelease(vList *list)
       if (current != NULL) vfree(current);
       current = next;
     }
-    vfree(list);
   }
+  vfree(list);
 }
 
 vList *vListAddNode(vList *list, void *val, enum VListDirection direction)
@@ -75,6 +75,7 @@ void vListDelNode(vList *list, vListNode *node)
   if (list->free) {
 	(*list->free)(node->val);
   }
+  list->len--;
   vfree(node);
 }
 
