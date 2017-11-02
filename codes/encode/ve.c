@@ -4,8 +4,6 @@
 #include <string.h>
 #include "ve.h"
 
-#define XE_MASK 0xff
-
 int ve_encode(VeData *vd)
 {
 	char a1;
@@ -19,17 +17,13 @@ int ve_encode(VeData *vd)
 	for (i = 0; i< vd->is; i++) {
 		a1 = *(vd->in + i);
 		l = 8;
-		//printf("in: %d\n", a1);
 	compute:
-		//printf("left: %zu, need: %zu\n", l, n);
 		if (l >= n) {
 			l = l - n;
-			//printf("((%d & %d) >> %zu) | %d\n", a1, (0xff << l) & 0xff, l, a2);
 			a2 = (((a1 & ((0xff << l) & 0xff)) >> l) | a2) & 0x3f;
 			a3 = vd->out + j;
 			*a3 = a2;
 			vd->len++;
-			//printf("out: %d.\n", a2);
 			n = 6;
 			a2 = 0x0;
 			if (++j > vd->os) {
@@ -48,7 +42,6 @@ int ve_encode(VeData *vd)
 		a3 = vd->out + j;
 		*a3 = a2;
 		vd->len++;
-		//printf("out: %d\n", a2);
 	}
 	return 3 - (vd->is % 3);
 }
