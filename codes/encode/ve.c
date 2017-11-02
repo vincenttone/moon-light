@@ -6,6 +6,8 @@
 
 #define XE_MASK 0xff
 
+
+
 int ve_encode(VeData *vd)
 {
 	char a1;
@@ -19,16 +21,17 @@ int ve_encode(VeData *vd)
 	for (i = 0; i< vd->is; i++) {
 		a1 = *(vd->in + i);
 		l = 8;
-		printf("in: %d\n", a1);
+		//printf("in: %d\n", a1);
 	compute:
-		printf("left: %zu, need: %zu\n", l, n);
+		//printf("left: %zu, need: %zu\n", l, n);
 		if (l >= n) {
 			l = l - n;
-			printf("((%d & %d) >> %zu) | %d\n", a1, (0xff << l) & 0xff, l, a2);
-			a2 = ((a1 & ((0xff << l) & 0xff)) >> l) | a2;
+			//printf("((%d & %d) >> %zu) | %d\n", a1, (0xff << l) & 0xff, l, a2);
+			a2 = (((a1 & ((0xff << l) & 0xff)) >> l) | a2) & 0x3f;
 			a3 = vd->out + j;
 			*a3 = a2;
-			printf("out: %d.\n", a2);
+			vd->len++;
+			//printf("out: %d.\n", a2);
 			n = 6;
 			a2 = 0x0;
 			if (++j > vd->os) {
@@ -46,9 +49,10 @@ int ve_encode(VeData *vd)
 	if (n > 0) {
 		a3 = vd->out + j;
 		*a3 = a2;
-		printf("out: %d\n", a2);
+		vd->len++;
+		//printf("out: %d\n", a2);
 	}
-	return n;
+	return 3 - (vd->is % 3);
 }
 
 int ve_encode_v0(VeData *vd)
@@ -106,64 +110,19 @@ int ve_encode_v0(VeData *vd)
 	return i;
 }
 
-int xencode(char *in, size_t s1, char *out, size_t s2)
-{
-	uint8_t a1;
-	uint8_t a2;
-	uint8_t *o;
-	size_t i = 0;
-	size_t l = 0; // len
-	size_t k = 0;
-	memset(out, 0x0, s2);
-	o = (uint8_t*)out;
-	for (; i < s1; i++) {
-		a1 = (uint8_t)(*(in + i));
-		if (k == 0) {
-			a2 = (a1 << 6 & XE_MASK) >> 2;
-			printf("A2.: %d, A1: %d, k: %zu\n", a2, a1, k);
-			k = 4;
-			*o = (*o) | (a1 >> 2);
-			printf("---output: %d.\n", *o);
-			o = (uint8_t*)(out + l);		
-			l += 8;
-		} else if (k == 1) {
-			*o = (*o) | a2 | (a1 >> 7);
-			printf("---output: %d..\n", *o);
-			o = (uint8_t*)(out + l);
-			l += 8;
-			a2 = (a1 << 7 & XE_MASK) >> 2;
-			printf("A2: %d..\n", a2);
-			*o = (*o) | (a1 >> 2);
-			printf("---output: %d...\n", *o);
-			o = (uint8_t*)(out + l);
-			l += 8;
-			k = 7;
-		} else {
-			*o = (*o) | a2 | (a1 >> (8 - k));
-			printf("---output: %d....\n", *o);
-			l += 8;
-			o = (uint8_t*)(out + l);
-			a2 = (a1 << (8 - k) & XE_MASK) >> 2;
-			printf("A2: %d, A1: %d, k: %zu\n", a2, a1, k);
-			k = k - 2;
-			if (k == 0) {
-				*o = (*o) | a2;
-				printf("---output: %d......\n", *o);
-				l += 8;
-				o = (uint8_t*)(out + l);
-			}
-		}
-	}
-	if (k != 0) {
-		*o = (*o) | a2;
-		printf("---output: %d.....\n", *o);
-		l += 8;
-	}
-	return l;
-}
 
 int main()
 {
+	static const char base64tbl[] = {// base64 alphabet
+		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+		'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+		'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+		'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+		'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+		'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+		'w', 'x', 'y', 'z', '0', '1', '2', '3',
+		'4', '5', '6', '7', '8', '9', '+', '/',
+	};
 	VeData *d = calloc(1, sizeof(VeData));
 	char a[4] = "abcd";
 	d->in = a;
@@ -171,5 +130,14 @@ int main()
 	d->out = malloc(sizeof(char) * 10);
 	d->os = 10;
 	size_t s = ve_encode(d);
+	printf("len: %zu, return: %zu\n", d->len, s);
+	size_t i;
+	for (i = 0; i< d->len; i++) {
+		printf("%c", base64tbl[*(d->out + i)]);
+	}
+	for (i = 0; i< s; i++) {
+		printf("=");
+	}
+	printf("\n");
 	return 0;
 }
