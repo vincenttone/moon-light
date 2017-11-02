@@ -9,4 +9,7 @@ typedef struct _VeData{
 	char *out;
 } VeData;
 
+int ve_encode(VeData*);
+
+
 #endif

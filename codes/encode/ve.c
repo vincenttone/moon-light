@@ -6,8 +6,6 @@
 
 #define XE_MASK 0xff
 
-
-
 int ve_encode(VeData *vd)
 {
 	char a1;
@@ -53,61 +51,6 @@ int ve_encode(VeData *vd)
 		//printf("out: %d\n", a2);
 	}
 	return 3 - (vd->is % 3);
-}
-
-int ve_encode_v0(VeData *vd)
-{
-	uint32_t a1;
-	uint32_t *a2;
-	size_t i = 0;
-	size_t j;
-	vd->len = 0;
-	for (; i< vd->is; i++) {
-		j = 8;
-		printf("input: %d\n", *(vd->in + i));
-		switch (i % 3) {
-		case 0:
-			if (i != 0) {
-				printf("%d\n", a1);
-				a2 = (uint32_t*)(vd->out + (32 * i / 3));
-				*a2 = (*a2) | a1;
-				vd->len++;
-			}
-			a1 = 0x0;
-			a1 = ((*(vd->in + i) & 0xfc) << 22) | a1;
-			j -= 6;
-			if (j == 0) continue;
-			printf("A1: %d\n", a1);
-			a1 = ((*(vd->in + i) & 0x3) << 20) | a1;
-			j -= 2;
-			if (j == 0) continue;
-			printf("A1: %d\n", a1);
-		case 1:
-			a1 = ((*(vd->in + i) & 0xfa) << 12) | a1;
-			j -= 4;
-			if (j == 0) continue;
-			printf("A1: %d\n", a1);
-			a1 = ((*(vd->in + i) & 0xe) << 10) | a1;
-			printf("A1: %d\n", a1);
-			j -= 4;
-			if (j == 0) continue;
-		case 2:
-			a1 = ((*(vd->in + i) & 0x3) << 2) | a1;
-			printf("A1: %d\n", a1);
-			j -= 2;
-			if (j == 0) continue;
-			a1 = (*(vd->in + i) & 0x40) | a1;
-			printf("A1: %d\n", a1);
-			j -= 6;
-			if (j == 0) continue;
-		}
-	}
-	if (i % 3 != 0) {
-		printf("%d.\n", a1);
-		*a2 = (*a2) | a1;
-		vd->len++;
-	}
-	return i;
 }
 
 
