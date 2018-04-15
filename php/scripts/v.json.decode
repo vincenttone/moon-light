@@ -1,0 +1,30 @@
+#!/usr/bin/env php
+<?php
+/**
+ * USAGE: echo JSON|__FILE__ [-fFILTER]
+ *    -f this is a flat array filter
+ *       use as -fa,b,c
+ */ 
+$x = getopt('f::');
+$filter = null;
+if (isset($x['f'])) {
+    $filter = explode(',', $x['f']);
+}
+if ($filter !== null) {
+    echo implode("\t", $filter);
+    echo PHP_EOL;
+}
+while($d = fgets(STDIN)) {
+    if ($filter === null) {
+        print_r(json_decode($d, true));
+    } else {
+        $data = json_decode($d, true);
+        $r = [];
+        foreach ($filter as $_f) {
+            isset($data[$_f]) ? array_push($r, $data[$_f])
+                : array_push($r, '');
+        }
+        echo implode("\t", $r);
+        echo PHP_EOL;
+    }
+};
