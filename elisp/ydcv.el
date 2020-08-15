@@ -1,5 +1,6 @@
 ;; You can get popup here: https://github.com/auto-complete/popup-el.git
 ;; and ydcv here: https://github.com/felixonmars/ydcv
+;; add ydcv to PATH
 (require 'popup)
 ;; Translating by ydcv
 (defun ydcv (string)
@@ -12,7 +13,7 @@
   (if (= (length string) 0)
       (popup-tip "\n  Please input word.  \n")
     (let ((result (shell-command-to-string
-                   (concat "/opt/bin/ydcv '"
+                   (concat "ydcv '"
                            string "'"))))
       (popup-tip result))
     )
